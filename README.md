@@ -18,6 +18,9 @@ This plugin scans all your `attachments/` folders—both in the vault root and i
 3. Check the console (`Ctrl+Shift+I` → Console tab) to see which files will be deleted.
 4. Confirm in the dialog to move those files to Obsidian’s trash.
 
+![image](https://github.com/user-attachments/assets/36512826-beaf-4051-9eb5-c2d747f128f5)
+
+
 ## Why use this plugin?
 
 Obsidian can easily collect unused screenshots and media over time. This plugin helps you keep things organized by safely removing any attachments you don’t actually use, while never touching banner images you want to keep.
