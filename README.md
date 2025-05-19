@@ -1,4 +1,4 @@
-# Delete Unused Attachments
+# Delete Unused Attachments (Obsidian plugin)
 
 **Keep your Obsidian vault clutter-free by automatically deleting attachments that are no longer referenced in your notes.**
 
