@@ -25,7 +25,8 @@ module.exports = class DeleteUnusedAttachmentsPlugin extends Plugin {
     const notesByDir = {};
     files.forEach(file => {
       if (file.extension === 'md') {
-        const dir = file.parent.path || "";
+        // Fix: root notes have parent.path === "/"
+        const dir = (file.parent.path === "/" ? "/" : file.parent.path || "");
         if (!notesByDir[dir]) notesByDir[dir] = [];
         notesByDir[dir].push(file);
       }
@@ -39,23 +40,29 @@ module.exports = class DeleteUnusedAttachmentsPlugin extends Plugin {
         continue;
       }
 
-      // Find the parent directory of this attachments folder (handle vault root as "")
+      // Find the parent directory of this attachments folder (handle vault root as "/")
       let parentDir;
       if (att.path.startsWith("attachments/")) {
-        parentDir = "";
+        parentDir = "/";
       } else {
         const match = att.path.match(/^(.*)\/attachments\//i);
         parentDir = (match && typeof match[1] !== "undefined") ? match[1] : "";
       }
 
-      if (!(parentDir in notesByDir)) {
+      // Find notes to check (explicit for root)
+      let notesToCheck;
+      if (att.path.startsWith("attachments/")) {
+        notesToCheck = notesByDir["/"] || [];
+      } else if (parentDir in notesByDir) {
+        notesToCheck = notesByDir[parentDir];
+      } else {
         unused.push(att);
         continue;
       }
 
       // Simple, case-insensitive filename match in sibling notes
       let isUsed = false;
-      for (let note of notesByDir[parentDir]) {
+      for (let note of notesToCheck) {
         const content = (await vault.read(note)).toLowerCase();
         if (content.includes(att.name.toLowerCase())) {
           isUsed = true;
