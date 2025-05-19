@@ -1,0 +1,10 @@
+{
+  "id": "delete-unused-attachments",
+  "name": "Delete Unused Attachments",
+  "version": "1.0.0",
+  "minAppVersion": "0.15.0",
+  "description": "Deletes all attachments not referenced in any note in the same directory.",
+  "author": "Roosmsg",
+  "authorUrl": "https://github.com/roosmsg/obsidian-delete-unused-attachments/",
+  "main": "main.js"
+}
