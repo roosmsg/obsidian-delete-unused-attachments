@@ -4,7 +4,7 @@
 
 ## What does it do?
 
-This plugin scans all your `attachments/` folders—both in the vault root and in any subfolder—and finds files (like images and media) that aren’t mentioned in any notes in the same folder. With one command, you can review and remove all these unused attachments.
+This plugin scans all your `attachments/` folders and finds files (like images and media) that aren’t mentioned in any notes in the same folder. With one command, you can review and remove all these unused attachments.
 
 - **Works for all `attachments/` folders** – root and subfolders.
 - **Skips banner images** – any file starting with `banner-image` will never be deleted.
