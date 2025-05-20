@@ -1,12 +1,28 @@
-const { Plugin, Notice, Modal } = require('obsidian');
+const { Plugin, Notice, Modal, PluginSettingTab, Setting } = require('obsidian');
 
+// Settings class and defaults
+class DeleteUnusedAttachmentsSettings {
+  moveBannersToRoot = false;
+}
+
+// Main plugin
 module.exports = class DeleteUnusedAttachmentsPlugin extends Plugin {
   async onload() {
+    // Load settings
+    this.settings = Object.assign(new DeleteUnusedAttachmentsSettings(), await this.loadData());
+
+    // Register settings tab
+    this.addSettingTab(new DeleteUnusedAttachmentsSettingTab(this.app, this));
+
     this.addCommand({
       id: 'delete-unused-attachments',
       name: 'Delete unused attachments (per folder)',
       callback: () => this.deleteUnusedAttachments(),
     });
+  }
+
+  async saveSettings() {
+    await this.saveData(this.settings);
   }
 
   async deleteUnusedAttachments() {
@@ -25,7 +41,6 @@ module.exports = class DeleteUnusedAttachmentsPlugin extends Plugin {
     const notesByDir = {};
     files.forEach(file => {
       if (file.extension === 'md') {
-        // Fix: root notes have parent.path === "/"
         const dir = (file.parent.path === "/" ? "/" : file.parent.path || "");
         if (!notesByDir[dir]) notesByDir[dir] = [];
         notesByDir[dir].push(file);
@@ -35,12 +50,28 @@ module.exports = class DeleteUnusedAttachmentsPlugin extends Plugin {
     // Collect unused attachments
     const unused = [];
     for (let att of attachments) {
-      // Skip any image whose name starts with banner-image or Banner-image
+      // Handle banner* logic based on user setting
+      if (this.settings.moveBannersToRoot && att.name.toLowerCase().startsWith("banner")) {
+        // If not already in root attachments, move it
+        if (!att.path.startsWith("attachments/")) {
+          const rootPath = `attachments/${att.name}`;
+          // Check if file already exists at target to avoid overwrite
+          if (!(await vault.adapter.exists(rootPath))) {
+            await vault.rename(att, rootPath);
+            new Notice(`Moved ${att.name} to root attachments/ folder.`);
+          } else {
+            new Notice(`Skipped moving ${att.name} (file exists in root attachments/).`);
+          }
+        }
+        continue; // Always skip further checks for banner* files
+      }
+
+      // Legacy skip for banner-image if needed
       if (att.name.toLowerCase().startsWith("banner-image")) {
         continue;
       }
 
-      // Find the parent directory of this attachments folder (handle vault root as "/")
+      // Find the parent directory of this attachments folder
       let parentDir;
       if (att.path.startsWith("attachments/")) {
         parentDir = "/";
@@ -109,3 +140,30 @@ module.exports = class DeleteUnusedAttachmentsPlugin extends Plugin {
     });
   }
 };
+
+// Settings tab
+class DeleteUnusedAttachmentsSettingTab extends PluginSettingTab {
+  constructor(app, plugin) {
+    super(app, plugin);
+    this.plugin = plugin;
+  }
+
+  display() {
+    const { containerEl } = this;
+    containerEl.empty();
+
+    containerEl.createEl("h2", { text: "Delete Unused Attachments Settings" });
+
+    new Setting(containerEl)
+      .setName('Move banner images to root attachments')
+      .setDesc('If enabled, files starting with "banner" will go to the root attachments instead of per-folder attachments.')
+      .addToggle(toggle =>
+        toggle
+          .setValue(this.plugin.settings.moveBannersToRoot)
+          .onChange(async (value) => {
+            this.plugin.settings.moveBannersToRoot = value;
+            await this.plugin.saveSettings();
+          })
+      );
+  }
+}
