@@ -10,7 +10,7 @@ This plugin scans all your `attachments/` folders and finds files (like images a
 - **Skips banner images** – any file starting with `banner-image` will never be deleted.
 - **Only checks sibling notes** – attachments are considered "used" if their filename appears in any note in the same folder as the `attachments/` folder.
 - **Preview before delete** – unused files are listed in the developer console for your review before you confirm deletion.
-- **Optional: Move banner images** - Files starting with 'banner' will go to the root attachments folder instead of per-folder attachments.
+- **Optional: Move banner images** - files starting with 'banner' will go to the root attachments instead of per-folder attachments.
 
 ## How to use
 
